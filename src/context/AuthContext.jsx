@@ -7,7 +7,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [loading, setLoading] = useState(true);
-// Check if token exists in localStorage
+  // Check if token exists in localStorage
   useEffect(() => {
     const fetchUser = async () => {
       if (!token) {
@@ -16,7 +16,9 @@ export const AuthProvider = ({ children }) => {
       }
 
       try {
-        const res = await getCurrentUser(token);
+        console.log("AuthContext token:", token);
+        const res = await getCurrentUser(); 
+        console.log("Fetched user:", res.data);
         setUser(res.data);
       } catch {
         logout(); // token invalid
@@ -26,14 +28,17 @@ export const AuthProvider = ({ children }) => {
     };
     fetchUser();
   }, [token]);
-// Fetch user data on initial load
+  // Fetch user data on initial load
   const login = (newToken, userData = null) => {
     localStorage.setItem("token", newToken);
+    if (userData) {
+      localStorage.setItem("user", JSON.stringify(userData));
+      setUser(userData);
+    }
     setToken(newToken);
-    if (userData) setUser(userData);
   };
 
-// Logout function to clear token and user data
+  // Logout function to clear token and user data
   const logout = () => {
     localStorage.removeItem("token");
     setUser(null);

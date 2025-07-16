@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Base axios instance
 const API = axios.create({
-  baseURL: "https://5e10c84e072a.ngrok-free.app/",
+  baseURL: "https://ccb1914a2f18.ngrok-free.app/",
 });
 
 // Automatically attach token unless it's a public endpoint

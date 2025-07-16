@@ -34,7 +34,7 @@ const TopNav = () => {
   }, []);
 
   return (
-    <header className="flex items-center justify-end px-6 py-4 border-b bg-[var(--color-surface)]">
+    <header className="flex items-center justify-end px-6 py-2 bg-surface border-b border-gray-300">
       <div className="relative" ref={dropdownRef}>
         <button
           onClick={() => setDropdownOpen((prev) => !prev)}

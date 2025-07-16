@@ -6,7 +6,7 @@ import ChatWindow from './ChatWindow';
 
 const ChatLayout = () => {
   return (
-    <div className="flex h-screen overflow-hidden bg-[var(--color-background)] text-[var(--color-text)]">
+    <div className="flex h-screen overflow-hidden bg-surface text-[var(--color-text)]">
       <ChatSidebar />
       <div className="flex-1 flex flex-col">
         <TopNav />

@@ -51,10 +51,10 @@ const Login = () => {
       const user = res.data.user;
  
 
-      // Save token to localStorage
-      localStorage.setItem("token", token);
-      //store user data to localStorage
-      localStorage.setItem("user", JSON.stringify(user));
+      // // Save token to localStorage
+      // localStorage.setItem("token", token);
+      // //store user data to localStorage
+      // localStorage.setItem("user", JSON.stringify(user));
 
       login(token, user); // save token + user to context
       navigate("/chat", { replace: true }); // redirect

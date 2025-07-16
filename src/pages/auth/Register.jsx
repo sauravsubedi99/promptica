@@ -122,16 +122,20 @@ const Register = () => {
       const token = res.data.access;
       const user = res.data.user;
 
-      // Save token to localStorage
-      localStorage.setItem("token", token);
-      //store user data to localStorage
-      localStorage.setItem("user", JSON.stringify(user));
+      // // Save token to localStorage
+      // localStorage.setItem("token", token);
+      // //store user data to localStorage
+      // localStorage.setItem("user", JSON.stringify(user));
 
       login(token, user);
       navigate("/chat");
     } catch (err) {
       const msg =
-        err.response?.data?.error || "Registration failed. Please try again.";
+      err?.response?.data?.message || 
+      err?.response?.data?.error || 
+      "Registration failed. Please try again."; // default fallback
+      console.error("Registration error:", err);
+
       setErrors({ general: msg });
     } finally {
       setLoading(false);

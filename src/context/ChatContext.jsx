@@ -15,14 +15,22 @@ export const ChatProvider = ({ children }) => {
   const [activeChatId, setActiveChatId] = useState(null);
   const [messages, setMessages] = useState([]);
 
+  // Loading flags
+  const [loadingChats, setLoadingChats] = useState(false);
+  const [loadingMessages, setLoadingMessages] = useState(false);
+  const [sendingMessage, setSendingMessage] = useState(false);
+
   // Fetch chats on mount
   useEffect(() => {
     const loadChats = async () => {
+      setLoadingChats(true);
       try {
         const res = await fetchConversations();
-        setChats(res.data || []);
+        setChats(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error("Failed to load conversations", err);
+      } finally {
+        setLoadingChats(false);
       }
     };
     loadChats();
@@ -42,12 +50,15 @@ export const ChatProvider = ({ children }) => {
 
   const selectChat = async (chatId) => {
     setActiveChatId(chatId);
+    setLoadingMessages(true);
     try {
       const res = await fetchMessages(chatId);
       setMessages(res.data || []);
     } catch (err) {
       console.error("Failed to load messages", err);
       setMessages([]);
+    } finally {
+      setLoadingMessages(false);
     }
   };
 
@@ -80,7 +91,7 @@ export const ChatProvider = ({ children }) => {
   const sendMessage = async (text) => {
     const userMsg = { role: 'user', content: text };
     setMessages((prev) => [...prev, userMsg]);
-
+    setSendingMessage(true);
     try {
       const res = await sendPrompt(activeChatId, text);
       const aiMsg = res.data?.response;
@@ -89,6 +100,8 @@ export const ChatProvider = ({ children }) => {
       }
     } catch (err) {
       console.error("Failed to send message", err);
+    } finally {
+      setSendingMessage(false);
     }
   };
 
@@ -98,6 +111,9 @@ export const ChatProvider = ({ children }) => {
         chats,
         activeChatId,
         messages,
+        loadingChats,
+        loadingMessages,
+        sendingMessage,
         createNewChat,
         selectChat,
         renameChat,

@@ -1,9 +1,9 @@
-// components/chat/ChatSidebar.jsx
 import React, { useState, useEffect } from 'react';
 import SidebarItem from './SidebarItem';
 import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import clsx from 'clsx';
 import { useChat } from '../../context/ChatContext';
+import logo from '../../assets/images/logos/logo.svg'; 
 
 const ChatSidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -13,7 +13,8 @@ const ChatSidebar = () => {
     createNewChat,
     selectChat,
     renameChat,
-    deleteChat
+    deleteChat,
+    loadingChats
   } = useChat();
 
   useEffect(() => {
@@ -30,16 +31,16 @@ const ChatSidebar = () => {
   return (
     <aside
       className={clsx(
-        'h-full border-r border-gray-200 bg-[var(--color-surface)] transition-all duration-300 flex flex-col shadow-sm',
+        'h-full bg-surface transition-all duration-300 flex flex-col border-r border-gray-300',
         collapsed ? 'w-[72px]' : 'w-[280px]'
       )}
     >
       {/* Header with logo and collapse */}
-      <div className="flex items-center justify-between px-4 py-3 border-b">
+      <div className="flex items-center justify-between px-4 py-3">
         <img
-          src="/logo.svg"
+          src={logo}
           alt="Promptica"
-          className={clsx('h-6 transition-all', collapsed && 'hidden')}
+          className={clsx('w-10 h-10 transition-all', collapsed && 'hidden')}
         />
         <button
           onClick={toggleSidebar}
@@ -63,17 +64,21 @@ const ChatSidebar = () => {
 
       {/* Chat list */}
       <nav className="flex-1 overflow-y-auto px-2 space-y-1">
-        {chats.map((chat) => (
-          <SidebarItem
-            key={chat.id}
-            chat={chat}
-            isActive={chat.id === activeChatId}
-            onDelete={() => deleteChat(chat.id)}
-            onRename={(newTitle) => renameChat(chat.id, newTitle)}
-            collapsed={collapsed}
-            onSelect={() => selectChat(chat.id)}
-          />
-        ))}
+        {loadingChats ? (
+          <p className="text-sm text-center text-gray-400 pt-2">Loading chats...</p>
+        ) : (
+          chats.map((chat) => (
+            <SidebarItem
+              key={chat.id}
+              chat={chat}
+              isActive={chat.id === activeChatId}
+              onDelete={() => deleteChat(chat.id)}
+              onRename={(newTitle) => renameChat(chat.id, newTitle)}
+              collapsed={collapsed}
+              onSelect={() => selectChat(chat.id)}
+            />
+          ))
+        )}
       </nav>
     </aside>
   );
