@@ -1,12 +1,15 @@
-import React from 'react'
-import './App.css'
+// src/App.jsx
+import React from 'react';
+import AppRouter from './routes/AppRouter.jsx';
+ 
 
-function App() {
+
+const App = () => {
   return (
-    <div className="App">
-      <h1>Welcome to PROMPTICA!!!</h1>
+    <div>
+      <AppRouter />
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;
