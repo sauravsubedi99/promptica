@@ -4,6 +4,8 @@ import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import clsx from 'clsx';
 import { useChat } from '../../context/ChatContext';
 import logo from '../../assets/images/logos/logo.svg'; 
+import { Link } from 'react-router-dom';
+
 
 const ChatSidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -37,11 +39,13 @@ const ChatSidebar = () => {
     >
       {/* Header with logo and collapse */}
       <div className="flex items-center justify-between px-4 py-3">
+        <Link to="/" >
         <img
           src={logo}
           alt="Promptica"
           className={clsx('w-10 h-10 transition-all', collapsed && 'hidden')}
         />
+        </Link>
         <button
           onClick={toggleSidebar}
           className="p-1 rounded hover:bg-gray-200"

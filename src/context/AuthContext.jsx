@@ -4,10 +4,13 @@ import { getCurrentUser } from "../lib/api";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem("user");
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [token, setToken] = useState(() => localStorage.getItem("token"));
   const [loading, setLoading] = useState(true);
-  // Check if token exists in localStorage
+
   useEffect(() => {
     const fetchUser = async () => {
       if (!token) {
@@ -16,31 +19,36 @@ export const AuthProvider = ({ children }) => {
       }
 
       try {
-        console.log("AuthContext token:", token);
-        const res = await getCurrentUser(); 
-        console.log("Fetched user:", res.data);
-        setUser(res.data);
-      } catch {
-        logout(); // token invalid
+        const res = await getCurrentUser();
+        setUser(res.data.user);
+        setToken(res.data.access);
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+        localStorage.setItem("token", res.data.access);
+      } catch (err) {
+        console.error("Failed to fetch user:", err);
+        logout();
       } finally {
         setLoading(false);
       }
     };
+
     fetchUser();
   }, [token]);
-  // Fetch user data on initial load
+
   const login = (newToken, userData = null) => {
     localStorage.setItem("token", newToken);
+    setToken(newToken);
+
     if (userData) {
       localStorage.setItem("user", JSON.stringify(userData));
       setUser(userData);
     }
-    setToken(newToken);
   };
 
-  // Logout function to clear token and user data
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("activeChatId"); // Optional: clean this too
     setUser(null);
     setToken(null);
   };

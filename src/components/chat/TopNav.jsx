@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { LogOut, Settings } from "lucide-react";
 import clsx from "clsx";
 import SettingsModal from "./SettingsModal";
-import { useAuth } from "../../context/AuthContext"; //
+import { useAuth } from "../../context/AuthContext";
 
 const TopNav = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -11,7 +11,7 @@ const TopNav = () => {
   const dropdownRef = useRef(null);
   const { user, logout } = useAuth(); //fetch user and logout from context
 
-  console.log("TopNav user:", user);
+  // console.log("TopNav user:", user);
 
   const handleLogout = () => {
     logout(); // use logout function from context
@@ -48,7 +48,7 @@ const TopNav = () => {
         {dropdownOpen && (
           <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
             <div className="px-4 py-2 text-sm text-gray-700 border-b">
-              {user?.email || "Loading..."}
+              {user?.full_name || "Loading..."}
             </div>
             <button
               onClick={handleSettings}

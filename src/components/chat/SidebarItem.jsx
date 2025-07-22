@@ -3,10 +3,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Trash2, Pencil, MessageCircle } from 'lucide-react';
 import clsx from 'clsx';
 
+
 const SidebarItem = ({ chat, isActive, onRename, onDelete, collapsed, onSelect }) => {
   const [isRenaming, setIsRenaming] = useState(false);
   const [inputValue, setInputValue] = useState(chat.title);
   const inputRef = useRef(null);
+
+  console.log("SidebarItem chat:", chat);
 
   useEffect(() => {
     if (isRenaming && inputRef.current) {

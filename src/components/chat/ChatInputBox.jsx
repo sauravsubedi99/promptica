@@ -19,7 +19,7 @@ const ChatInputBox = () => {
   };
 
   const handleSend = () => {
-    if (!input.trim() || !activeChatId) return;
+    if (!input.trim()) return;
     sendMessage(input.trim());
     setInput('');
     setRows(4); // reset after send
@@ -50,7 +50,7 @@ const ChatInputBox = () => {
             variant="primary"
             size="lg"
             onClick={handleSend}
-            disabled={!input.trim() || !activeChatId || sendingMessage}
+            disabled={!input.trim() || sendingMessage}
             loading={sendingMessage}
             rightIcon={<SendHorizonal className="w-4 h-4" />}
           >
