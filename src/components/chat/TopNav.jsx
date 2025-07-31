@@ -57,22 +57,37 @@ const TopNav = () => {
         </button>
 
         {dropdownOpen && (
-          <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
-            <div className="px-4 py-2 text-sm text-gray-700 border-b">
-              {user?.full_name || "Loading..."}
+          <div className="absolute right-0 mt-2 w-56 rounded-xl shadow-xl bg-white ring-1 ring-black/10 z-50 transition-all duration-200">
+            {/* User Info Section */}
+            <div className="px-4 py-3 border-b border-gray-100">
+              <p className="text-sm font-medium text-gray-900 truncate">
+                {user?.full_name || "Loading..."}
+              </p>
+              <p className="text-xs text-gray-500 truncate">
+                {user?.email || ""}
+              </p>
             </div>
-            <button
-              onClick={handleSettings}
-              className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-            >
-              <Settings size={16} /> Settings
-            </button>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-            >
-              <LogOut size={16} /> Log out
-            </button>
+
+            {/* Menu Actions */}
+            <div className="py-2">
+              <button
+                onClick={handleSettings}
+                className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition rounded-lg"
+              >
+                <Settings
+                  size={16}
+                  className="text-gray-500 group-hover:text-blue-700"
+                />
+                <span>Settings</span>
+              </button>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition rounded-lg"
+              >
+                <LogOut size={16} className="text-red-500" />
+                <span>Log out</span>
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -81,7 +96,6 @@ const TopNav = () => {
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         onSave={() => {
-          console.log("Saving settings...");
           setModalOpen(false);
         }}
         user={user} // Pass user data to modal
