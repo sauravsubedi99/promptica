@@ -11,50 +11,59 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(() => localStorage.getItem("token"));
   const [loading, setLoading] = useState(true);
 
+  // ✅ Reusable function to fetch the latest user (used in modal updates too)
+  const fetchCurrentUser = async () => {
+    if (!token) return;
+    try {
+      const res = await getCurrentUser();
+      setUser(res.data.user);
+      setToken(res.data.access); // if your endpoint refreshes token
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+      localStorage.setItem("token", res.data.access);
+    } catch (err) {
+      console.error("Failed to fetch user:", err);
+      logout();
+    }
+  };
+
+  // Initial fetch on mount or token change
   useEffect(() => {
-    const fetchUser = async () => {
+    const init = async () => {
       if (!token) {
         setLoading(false);
         return;
       }
-
-      try {
-        const res = await getCurrentUser();
-        setUser(res.data.user);
-        setToken(res.data.access);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
-        localStorage.setItem("token", res.data.access);
-      } catch (err) {
-        console.error("Failed to fetch user:", err);
-        logout();
-      } finally {
-        setLoading(false);
-      }
+      await fetchCurrentUser();
+      setLoading(false);
     };
-
-    fetchUser();
+    init();
   }, [token]);
 
+  // ✅ Login updates token + user (optional userData param)
   const login = (newToken, userData = null) => {
     localStorage.setItem("token", newToken);
     setToken(newToken);
-
     if (userData) {
       localStorage.setItem("user", JSON.stringify(userData));
       setUser(userData);
+    } else {
+      fetchCurrentUser(); // fallback fetch if userData isn't provided
     }
   };
 
+  // ✅ Logout clears everything
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    localStorage.removeItem("activeChatId"); // Optional: clean this too
+    localStorage.removeItem("activeChatId"); // Optional: clean chat state too
     setUser(null);
     setToken(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, loading }}>
+    <AuthContext.Provider
+      value={{ user, token, login, logout, loading, setUser, fetchCurrentUser }}
+    >
       {children}
     </AuthContext.Provider>
   );

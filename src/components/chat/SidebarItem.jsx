@@ -9,7 +9,7 @@ const SidebarItem = ({ chat, isActive, onRename, onDelete, collapsed, onSelect }
   const [inputValue, setInputValue] = useState(chat.title);
   const inputRef = useRef(null);
 
-  console.log("SidebarItem chat:", chat);
+  // console.log("SidebarItem chat:", chat);
 
   useEffect(() => {
     if (isRenaming && inputRef.current) {

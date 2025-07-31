@@ -107,7 +107,12 @@ export const ChatProvider = ({ children, chatIdFromRoute }) => {
       // Split query/response pairs into separate user + ai messages
       let mapped = (res.data || []).flatMap((item) => [
         { role: "user", content: item.query },
-        { role: "ai", content: item.response },
+        {
+          role: "ai",
+          content: item.response,
+          message_id: item.id,
+          feedback: item.feedback || null, 
+        },
       ]);
 
       // Re-inject queued message if this is a new chat
@@ -115,7 +120,6 @@ export const ChatProvider = ({ children, chatIdFromRoute }) => {
         mapped = [queuedInitialMessage];
         queuedInitialMessage = null;
       }
-
       setMessages(mapped);
     } catch (err) {
       console.error("Failed to load messages", err);

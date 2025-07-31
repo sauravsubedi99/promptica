@@ -4,14 +4,17 @@ import clsx from "clsx";
 import { useChat } from "../../context/ChatContext";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import { normalizeUrls } from "../../utils/normalizerUrls";
+import { sendFeedback } from "../../lib/api";
 
 const ChatBubble = ({ message }) => {
-  // Prevent rendering if message is missing or invalid
-  if (!message || typeof message.content !== "string") return null;
+// Prevent rendering if message is missing or invalid
+if (!message || typeof message.content !== "string") return null;
 
   const isUser = message.role === "user";
-  const [liked, setLiked] = useState(false);
-  const [disliked, setDisliked] = useState(false);
+  const [liked, setLiked] = useState(message.feedback === "like");
+  const [disliked, setDisliked] = useState(message.feedback === "dislike");
   const [copied, setCopied] = useState(false);
   const { activeChatId } = useChat();
 
@@ -19,21 +22,35 @@ const ChatBubble = ({ message }) => {
   const handleCopy = () => {
     navigator.clipboard.writeText(message.content);
     setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    // setTimeout(() => setCopied(false), 1500);
   };
+  // Like  handler
+  const handleLike = async () => {
+    const newLiked = !liked;
+    const newDisliked = false;
 
-  // Like / Dislike
-  const handleLike = () => {
-    setLiked(true);
-    setDisliked(false);
-    // Optionally send feedback to backend
-    // sendFeedback(activeChatId, message.content, 'like');
+    setLiked(newLiked);
+    setDisliked(newDisliked);
+
+    try {
+      await sendFeedback(message.message_id, newLiked ? "like" : "");
+    } catch (err) {
+      console.error("Failed to send like feedback:", err);
+    }
   };
+  // Dislike handler
+  const handleDislike = async () => {
+    const newDisliked = !disliked;
+    const newLiked = false;
 
-  const handleDislike = () => {
-    setLiked(false);
-    setDisliked(true);
-    // sendFeedback(activeChatId, message.content, 'dislike');
+    setDisliked(newDisliked);
+    setLiked(newLiked);
+
+    try {
+      await sendFeedback(message.message_id, newDisliked ? "dislike" : "");
+    } catch (err) {
+      console.error("Failed to send dislike feedback:", err);
+    }
   };
 
   // Timestamp formatter
@@ -77,9 +94,17 @@ const ChatBubble = ({ message }) => {
             </pre>
           ),
           li: ({ children }) => <li className="ml-4 list-disc">{children}</li>,
+          a: ({ node, ...props }) => (
+            <a
+              {...props}
+              className="text-blue-600 underline"
+              target="_blank"
+              rel="noopener noreferrer"
+            />
+          ),
         }}
       >
-        {message.content}
+        {normalizeUrls(message.content)}
       </ReactMarkdown>
 
       <div className="flex items-center justify-between mt-3 text-xs text-gray-400">

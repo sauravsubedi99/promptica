@@ -1,43 +1,35 @@
-// src/routes/AppRouter.jsx
-
-import React from "react";
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-
-import Landing from "../pages/landing/Landing";
+import { Routes, Route } from "react-router-dom";
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
-import ChatPage from "../pages/chat/ChatPage";
-import NotFoundPage from "../pages/NotFoundPage.jsx";
-import ProtectedRoute from "./ProtectedRoute.jsx";
 import ForgotPassword from "../pages/auth/ForgotPassword";
-import VerifyOTP from "../pages/auth/VerifyOtp.jsx";
+import ChatPage from "../pages/chat/ChatPage";
+import NotFoundPage from "../pages/NotFoundPage";
+import ProtectedRoute from "./ProtectedRoute";
+import RootRedirect from "./RootRedirect";
+import TermsOfService from "../pages/policy/TermsOfService";
+import PrivacyPolicy from "../pages/policy/PrivacyPolicy";
+import ResetPassword from "../pages/auth/PasswordReset";
 
 const AppRouter = () => {
-  const isLoggedIn = !!localStorage.getItem("user");
-  const location = useLocation();
-
   return (
     <Routes>
-      {/* Public Routes */}
+      <Route path="/" element={<RootRedirect />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/verify-otp" element={<VerifyOTP />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/terms" element={<TermsOfService />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
 
-      {/* Home route logic */}
       <Route
-        path="/"
+        path="/chat/:id?"
         element={
-          isLoggedIn ? <Navigate to="/chat" replace /> : <Navigate to="/login" replace />
+          <ProtectedRoute>
+            <ChatPage />
+          </ProtectedRoute>
         }
       />
 
-      {/* Protected Routes */}
-      <Route element={<ProtectedRoute />}>
-        <Route path="/chat/:id?" element={<ChatPage />} />
-      </Route>
-
-      {/* 404 Fallback */}
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );

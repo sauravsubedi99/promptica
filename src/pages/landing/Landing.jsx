@@ -1,11 +1,14 @@
-
 // src/pages/landing/Landing.jsx
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { H1, H4, Button } from "./../../components/ui";
 import logo from "../../assets/images/logos/logo.svg";
 
 const Landing = () => {
+  useEffect(() => {
+    // console.log("Landing component MOUNTED");
+  }, []);
+
   return (
     <div className="h-screen bg-surface flex flex-col justify-center items-center px-4 text-center">
       <Link to="/">
@@ -19,9 +22,7 @@ const Landing = () => {
             <Button size="lg">Login</Button>
           </Link>
           <Link to="/register">
-            <Button size="lg" variant="secondary">
-              Register
-            </Button>
+            <Button size="lg" variant="secondary">Register</Button>
           </Link>
         </div>
       </div>

@@ -3,42 +3,14 @@ import { useNavigate } from "react-router-dom";
 import AuthLayout from "../../components/layout/AuthLayout";
 import Input from "../../components/ui/Input/Input";
 import PasswordInput from "../../components/ui/Input/PasswordInput";
+import PasswordStrengthMeter from "../../components/ui/PasswordStrengthMeter";
 import Button from "../../components/ui/Button/Button";
 import Alert from "../../components/ui/Feedback/Alert";
 import { H1 } from "../../components/ui/Typography/Heading";
-import { User, Mail, CalendarDays, ArrowRight, Check, X } from "lucide-react";
+import { User, Mail, CalendarDays, ArrowRight } from "lucide-react";
 import logo from "../../assets/images/logos/logo.svg";
-import { signup } from "../../lib/api"; // API call
+import { signup } from "../../lib/api";
 import { useAuth } from "../../context/AuthContext";
-
-const getPasswordStrength = (password) => {
-  if (!password) return { score: 0, level: null, checks: {} };
-
-  const checks = {
-    length: password.length >= 8,
-    uppercase: /[A-Z]/.test(password),
-    lowercase: /[a-z]/.test(password),
-    number: /[0-9]/.test(password),
-    special: /[^A-Za-z0-9]/.test(password),
-  };
-
-  const score = Object.values(checks).filter(Boolean).length;
-
-  const levels = [
-    { name: "Very Weak", bgColor: "bg-red-500", textColor: "text-red-600" },
-    { name: "Weak", bgColor: "bg-red-400", textColor: "text-red-600" },
-    { name: "Fair", bgColor: "bg-yellow-500", textColor: "text-yellow-600" },
-    { name: "Good", bgColor: "bg-blue-500", textColor: "text-blue-600" },
-    { name: "Strong", bgColor: "bg-green-500", textColor: "text-green-600" },
-  ];
-
-  return {
-    score,
-    level: levels[Math.min(score, levels.length - 1)],
-    checks,
-    percentage: (score / 5) * 100,
-  };
-};
 
 const Register = () => {
   const { login } = useAuth();
@@ -54,61 +26,84 @@ const Register = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
-  const passwordStrength = getPasswordStrength(formData.password);
+  // Field-level validation logic
+  const validateField = (field, value) => {
+    switch (field) {
+      case "fullName":
+        if (!value.trim()) return "Full name is required.";
+        return "";
+      case "email":
+        if (!value) return "Email is required.";
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return "Enter a valid email address.";
+        return "";
+      case "dob":
+        if (!value) return "Date of birth is required.";
+        const dobDate = new Date(value);
+        const today = new Date();
+        const age = today.getFullYear() - dobDate.getFullYear();
+        if (dobDate > today) return "Date of birth cannot be in the future.";
+        if (age < 13) return "You must be at least 13 years old.";
+        return "";
+      case "password":
+        if (!value) return "Password is required.";
+        if (value.length < 8) return "Password must be at least 8 characters long.";
+        return "";
+      case "confirmPassword":
+        if (!value) return "Please confirm your password.";
+        if (value !== formData.password) return "Passwords do not match.";
+        return "";
+      case "acceptTerms":
+        if (!value) return "You must accept the terms and conditions.";
+        return "";
+      default:
+        return "";
+    }
+  };
 
+  // On input change (real-time validation)
+  const handleChange = (field) => (e) => {
+    const value = e.target.type === "checkbox" ? e.target.checked : e.target.value;
+    setFormData((prev) => ({ ...prev, [field]: value }));
+
+    const errorMsg = validateField(field, value);
+    setErrors((prev) => ({ ...prev, [field]: errorMsg }));
+
+    // Additional live validation for confirmPassword when password changes
+    if (field === "password" && formData.confirmPassword) {
+      const matchError = formData.confirmPassword !== value ? "Passwords do not match." : "";
+      setErrors((prev) => ({ ...prev, confirmPassword: matchError }));
+    }
+    if (field === "confirmPassword") {
+      const matchError = value !== formData.password ? "Passwords do not match." : "";
+      setErrors((prev) => ({ ...prev, confirmPassword: matchError }));
+    }
+  };
+
+  const handleFocus = (field) => () => {
+    setErrors((prev) => {
+      const updated = { ...prev };
+      delete updated[field];
+      return updated;
+    });
+  };
+
+  // Final submit validation
   const validateForm = () => {
     const newErrors = {};
-
-    if (!formData.fullName.trim()) {
-      newErrors.fullName = "Full name is required.";
-    }
-
-    if (!formData.email) {
-      newErrors.email = "Email is required.";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address.";
-    }
-
-    if (!formData.dob) {
-      newErrors.dob = "Date of birth is required.";
-    } else {
-      const dobDate = new Date(formData.dob);
-      const today = new Date();
-      const age = today.getFullYear() - dobDate.getFullYear();
-      if (dobDate > today) {
-        newErrors.dob = "Date of birth cannot be in the future.";
-      } else if (age < 13) {
-        newErrors.dob = "You must be at least 13 years old.";
-      }
-    }
-
-    if (!formData.password) {
-      newErrors.password = "Password is required.";
-    } else if (formData.password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters long.";
-    }
-
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Please confirm your password.";
-    } else if (formData.confirmPassword !== formData.password) {
-      newErrors.confirmPassword = "Passwords do not match.";
-    }
-
-    if (!formData.acceptTerms) {
-      newErrors.acceptTerms = "You must accept the terms and conditions.";
-    }
-
+    Object.keys(formData).forEach((field) => {
+      const errorMsg = validateField(field, formData[field]);
+      if (errorMsg) newErrors[field] = errorMsg;
+    });
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
+    if (!validateForm()) return;
+
     setLoading(true);
-
     try {
-      if (!validateForm()) return;
-
       const payload = {
         full_name: formData.fullName,
         email: formData.email,
@@ -118,60 +113,22 @@ const Register = () => {
       };
 
       const res = await signup(payload);
-
       const token = res.data.access;
       const user = res.data.user;
-
-      // // Save token to localStorage
-      // localStorage.setItem("token", token);
-      // //store user data to localStorage
-      // localStorage.setItem("user", JSON.stringify(user));
 
       login(token, user);
       navigate("/chat");
     } catch (err) {
-      const msg =
-      err?.response?.data?.message || 
-      err?.response?.data?.error || 
-      "Registration failed. Please try again."; // default fallback
-      console.error("Registration error:", err);
+      let msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        Object.values(err?.response?.data || {})[0]?.[0] ||
+        "Registration failed. Please try again.";
 
+      msg = msg.charAt(0).toUpperCase() + msg.slice(1);
       setErrors({ general: msg });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleChange = (field) => (e) => {
-    const value =
-      e.target.type === "checkbox" ? e.target.checked : e.target.value;
-    setFormData((prev) => ({ ...prev, [field]: value }));
-
-    if (errors[field]) {
-      setErrors((prev) => {
-        const updated = { ...prev };
-        delete updated[field];
-        return updated;
-      });
-    }
-
-    if (field === "confirmPassword" || field === "password") {
-      const match =
-        field === "password"
-          ? formData.confirmPassword === value
-          : value === formData.password;
-      if (!match) {
-        setErrors((prev) => ({
-          ...prev,
-          confirmPassword: "Passwords do not match.",
-        }));
-      } else {
-        setErrors((prev) => {
-          const updated = { ...prev };
-          delete updated.confirmPassword;
-          return updated;
-        });
-      }
     }
   };
 
@@ -209,6 +166,7 @@ const Register = () => {
             label="Full Name"
             value={formData.fullName}
             onChange={handleChange("fullName")}
+            onFocus={handleFocus("fullName")}
             error={errors.fullName}
             leftIcon={<User className="w-4 h-4" />}
             disabled={loading}
@@ -221,6 +179,7 @@ const Register = () => {
             type="email"
             value={formData.email}
             onChange={handleChange("email")}
+            onFocus={handleFocus("email")}
             error={errors.email}
             leftIcon={<Mail className="w-4 h-4" />}
             disabled={loading}
@@ -233,6 +192,7 @@ const Register = () => {
             type="date"
             value={formData.dob}
             onChange={handleChange("dob")}
+            onFocus={handleFocus("dob")}
             error={errors.dob}
             leftIcon={<CalendarDays className="w-4 h-4" />}
             disabled={loading}
@@ -243,59 +203,20 @@ const Register = () => {
             label="Password"
             value={formData.password}
             onChange={handleChange("password")}
+            onFocus={handleFocus("password")}
             error={errors.password}
             disabled={loading}
             autoComplete="new-password"
             required
           />
 
-          {formData.password && (
-            <div className="mt-2">
-              <div className="flex items-center justify-between mb-2">
-                <span
-                  className={`text-sm font-medium ${passwordStrength.level?.textColor}`}
-                >
-                  Password Strength: {passwordStrength.level?.name}
-                </span>
-                <span className="text-xs text-gray-500">
-                  {passwordStrength.score}/5
-                </span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
-                <div
-                  className={`h-2 rounded-full transition-all duration-300 ${passwordStrength.level?.bgColor}`}
-                  style={{ width: `${passwordStrength.percentage}%` }}
-                />
-              </div>
-              <div className="space-y-1 mt-2">
-                {Object.entries(passwordStrength.checks).map(
-                  ([key, passed]) => (
-                    <div key={key} className="flex items-center text-xs">
-                      {passed ? (
-                        <Check className="w-3 h-3 text-green-500 mr-2" />
-                      ) : (
-                        <X className="w-3 h-3 text-gray-400 mr-2" />
-                      )}
-                      <span
-                        className={passed ? "text-green-600" : "text-gray-500"}
-                      >
-                        {key === "length" && "At least 8 characters"}
-                        {key === "uppercase" && "One uppercase letter"}
-                        {key === "lowercase" && "One lowercase letter"}
-                        {key === "number" && "One number"}
-                        {key === "special" && "One special character"}
-                      </span>
-                    </div>
-                  )
-                )}
-              </div>
-            </div>
-          )}
+          {formData.password && <PasswordStrengthMeter password={formData.password} />}
 
           <PasswordInput
             label="Confirm Password"
             value={formData.confirmPassword}
             onChange={handleChange("confirmPassword")}
+            onFocus={handleFocus("confirmPassword")}
             error={errors.confirmPassword}
             disabled={loading}
             autoComplete="new-password"
@@ -307,6 +228,7 @@ const Register = () => {
               type="checkbox"
               checked={formData.acceptTerms}
               onChange={handleChange("acceptTerms")}
+              onFocus={handleFocus("acceptTerms")}
               disabled={loading}
               className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 mt-0.5"
             />
@@ -327,9 +249,7 @@ const Register = () => {
               </button>
             </span>
           </label>
-          {errors.acceptTerms && (
-            <p className="text-xs text-red-600 ml-5">{errors.acceptTerms}</p>
-          )}
+          {errors.acceptTerms && <p className="text-xs text-red-600 ml-5">{errors.acceptTerms}</p>}
 
           <Button
             onClick={handleSubmit}

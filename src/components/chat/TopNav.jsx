@@ -1,21 +1,24 @@
 // components/chat/TopNav.jsx
 import React, { useState, useRef, useEffect } from "react";
 import { LogOut, Settings } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import clsx from "clsx";
 import SettingsModal from "./SettingsModal";
 import { useAuth } from "../../context/AuthContext";
+import { IMAGE_BASE_URL } from "../../config";
 
 const TopNav = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const dropdownRef = useRef(null);
   const { user, logout } = useAuth(); //fetch user and logout from context
+  const navigate = useNavigate();
 
   // console.log("TopNav user:", user);
 
   const handleLogout = () => {
     logout(); // use logout function from context
-    window.location.href = "/login"; // redirect
+    navigate("/login", { replace: true }); // redirect to login
   };
 
   const handleSettings = () => {
@@ -40,9 +43,17 @@ const TopNav = () => {
           onClick={() => setDropdownOpen((prev) => !prev)}
           className="rounded-full w-9 h-9 overflow-hidden focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
         >
-          <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold text-sm uppercase">
-            {user?.full_name?.charAt(0) || "U"}
-          </div>
+          {user?.image ? (
+            <img
+              src={`${IMAGE_BASE_URL}${user.image}`}
+              alt="User avatar"
+              className="w-9 h-9 rounded-full object-cover"
+            />
+          ) : (
+            <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold text-sm uppercase">
+              {user?.full_name?.charAt(0) || "U"}
+            </div>
+          )}
         </button>
 
         {dropdownOpen && (
