@@ -19,9 +19,18 @@ const SettingsModal = ({ isOpen, onClose }) => {
   const [previewUrl, setPreviewUrl] = useState(null);
 
   // Feedback states for each tab
-  const [accountFeedback, setAccountFeedback] = useState({ type: "", message: "" });
-  const [securityFeedback, setSecurityFeedback] = useState({ type: "", message: "" });
-  const [settingsFeedback, setSettingsFeedback] = useState({ type: "", message: "" });
+  const [accountFeedback, setAccountFeedback] = useState({
+    type: "",
+    message: "",
+  });
+  const [securityFeedback, setSecurityFeedback] = useState({
+    type: "",
+    message: "",
+  });
+  const [settingsFeedback, setSettingsFeedback] = useState({
+    type: "",
+    message: "",
+  });
 
   const [currentPwd, setCurrentPwd] = useState("");
   const [newPwd, setNewPwd] = useState("");
@@ -109,22 +118,41 @@ const SettingsModal = ({ isOpen, onClose }) => {
       setConfirmPwd("");
       setShowStrength(false);
     } catch (err) {
-      console.error("Password update failed:", err.response?.data || err);
+      // console.error("Password update failed:", err.response?.data || err);
+
+      let msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.response?.data?.detail ||
+        // Extract first field error dynamically if backend returns field-level errors
+        (typeof err?.response?.data === "object"
+          ? Object.values(err.response.data)[0]?.[0]
+          : null) ||
+        "Failed to update password. Try again.";
+
+      msg = msg.charAt(0).toUpperCase() + msg.slice(1);
+
       setSecurityFeedback({
         type: "error",
-        message: "Failed to update password. Try again.",
+        message: msg,
       });
     }
   };
 
   const handlePromptSave = () => {
     localStorage.setItem("generalPrompt", generalPrompt);
-    setSettingsFeedback({ type: "success", message: "Prompt saved successfully." });
+    setSettingsFeedback({
+      type: "success",
+      message: "Prompt saved successfully.",
+    });
   };
 
   const handleProfilePhotoUpload = async () => {
     if (!selectedFile) {
-      setAccountFeedback({ type: "error", message: "Please select a file first." });
+      setAccountFeedback({
+        type: "error",
+        message: "Please select a file first.",
+      });
       return;
     }
 
@@ -132,19 +160,28 @@ const SettingsModal = ({ isOpen, onClose }) => {
     const maxSize = 2 * 1024 * 1024;
 
     if (!validTypes.includes(selectedFile.type)) {
-      setAccountFeedback({ type: "error", message: "Only JPEG and PNG formats are allowed." });
+      setAccountFeedback({
+        type: "error",
+        message: "Only JPEG and PNG formats are allowed.",
+      });
       return;
     }
 
     if (selectedFile.size > maxSize) {
-      setAccountFeedback({ type: "error", message: "File size must not exceed 2 MB." });
+      setAccountFeedback({
+        type: "error",
+        message: "File size must not exceed 2 MB.",
+      });
       return;
     }
 
     try {
       await updateUserPhoto(selectedFile);
       await fetchCurrentUser();
-      setAccountFeedback({ type: "success", message: "Profile photo updated successfully." });
+      setAccountFeedback({
+        type: "success",
+        message: "Profile photo updated successfully.",
+      });
       setSelectedFile(null);
     } catch (err) {
       console.error("Photo upload failed:", err.response?.data || err);
@@ -198,7 +235,9 @@ const SettingsModal = ({ isOpen, onClose }) => {
                 <Alert
                   variant={accountFeedback.type}
                   dismissible
-                  onDismiss={() => setAccountFeedback({ type: "", message: "" })}
+                  onDismiss={() =>
+                    setAccountFeedback({ type: "", message: "" })
+                  }
                   className="mb-4"
                 >
                   {accountFeedback.message}
@@ -207,10 +246,17 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
               {/* Profile Picture */}
               <div className="flex flex-col items-center">
-                <label htmlFor="photoUpload" className="relative group cursor-pointer">
+                <label
+                  htmlFor="photoUpload"
+                  className="relative group cursor-pointer"
+                >
                   <div className="w-40 h-40 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center border-2 border border-gray-300 group-hover:border-blue-400 transition">
                     {previewUrl ? (
-                      <img src={previewUrl} alt="Profile Preview" className="w-full h-full object-cover" />
+                      <img
+                        src={previewUrl}
+                        alt="Profile Preview"
+                        className="w-full h-full object-cover"
+                      />
                     ) : (
                       <User size={48} className="text-gray-500" />
                     )}
@@ -256,7 +302,11 @@ const SettingsModal = ({ isOpen, onClose }) => {
                   className="hidden"
                 />
                 {selectedFile && (
-                  <Button variant="primary" className="mt-3" onClick={handleProfilePhotoUpload}>
+                  <Button
+                    variant="primary"
+                    className="mt-3"
+                    onClick={handleProfilePhotoUpload}
+                  >
                     Save New Photo
                   </Button>
                 )}
@@ -267,10 +317,16 @@ const SettingsModal = ({ isOpen, onClose }) => {
                 {[
                   { label: "Name", value: user?.full_name },
                   { label: "Email", value: user?.email },
-                  { label: "Date of Birth", value: user?.dob || "Not Provided" },
+                  {
+                    label: "Date of Birth",
+                    value: user?.dob || "Not Provided",
+                  },
                   { label: "Total Conversations", value: chats.length },
                 ].map((item) => (
-                  <div key={item.label} className="border-b border-gray-200 pb-2">
+                  <div
+                    key={item.label}
+                    className="border-b border-gray-200 pb-2"
+                  >
                     <div className="text-gray-400 font-semibold tracking-wide text-md uppercase mb-2">
                       {item.label}
                     </div>
@@ -289,7 +345,9 @@ const SettingsModal = ({ isOpen, onClose }) => {
                 <Alert
                   variant={securityFeedback.type}
                   dismissible
-                  onDismiss={() => setSecurityFeedback({ type: "", message: "" })}
+                  onDismiss={() =>
+                    setSecurityFeedback({ type: "", message: "" })
+                  }
                   className="mb-4"
                 >
                   {securityFeedback.message}
@@ -330,7 +388,9 @@ const SettingsModal = ({ isOpen, onClose }) => {
                 <Alert
                   variant={settingsFeedback.type}
                   dismissible
-                  onDismiss={() => setSettingsFeedback({ type: "", message: "" })}
+                  onDismiss={() =>
+                    setSettingsFeedback({ type: "", message: "" })
+                  }
                   className="mb-4"
                 >
                   {settingsFeedback.message}

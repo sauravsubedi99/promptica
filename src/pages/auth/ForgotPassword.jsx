@@ -32,13 +32,22 @@ const ForgotPassword = () => {
       }
 
       // API request to send reset link
-      const res = await resetPasswordRequest({ email });
-      console.log("Response:", res);
-      console.log("Data:", res.data);
-
-      setMessage("A password reset link has been sent to your email. Please check your inbox.");
+      await resetPasswordRequest({ email });
+      setMessage(
+        "A password reset link has been sent to your email. Please check your inbox."
+      );
     } catch (err) {
-      const msg = err.response?.data?.error || "Failed to send reset link. Try again.";
+      let msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.response?.data?.detail ||
+        // Dynamically pick first field error if available
+        (typeof err?.response?.data === "object"
+          ? Object.values(err.response.data)[0]?.[0]
+          : null) ||
+        "Failed to send OTP. Try again.";
+
+      msg = msg.charAt(0).toUpperCase() + msg.slice(1);
       setError(msg);
     } finally {
       setLoading(false);
