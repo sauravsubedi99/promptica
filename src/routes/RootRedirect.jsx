@@ -1,7 +1,7 @@
 // RootRedirect.jsx
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import Landing from "../pages/Landing/Landing.jsx";
+import Landing from "../pages/landing/Landing.jsx";
 
 const RootRedirect = () => {
   const navigate = useNavigate();
