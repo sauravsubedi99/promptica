@@ -5,7 +5,9 @@ import { useNavigate } from "react-router-dom";
 import clsx from "clsx";
 import SettingsModal from "./SettingsModal";
 import { useAuth } from "../../context/AuthContext";
-import { IMAGE_BASE_URL } from "../../config";
+// import { IMAGE_BASE_URL } from "../../config";
+import { getUserImageUrl } from "../../config";
+
 
 const TopNav = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -45,7 +47,7 @@ const TopNav = () => {
         >
           {user?.image ? (
             <img
-              src={`${IMAGE_BASE_URL}${user.image}`}
+              src={getUserImageUrl(user?.image)}
               alt="User avatar"
               className="w-9 h-9 rounded-full object-cover"
             />
