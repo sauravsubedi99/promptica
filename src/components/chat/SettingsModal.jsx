@@ -9,7 +9,6 @@ import { useAuth } from "../../context/AuthContext";
 import { useChat } from "../../context/ChatContext";
 import { H3 } from "../ui";
 import { updateUserPassword, updateUserPhoto } from "../../lib/api";
-// import { IMAGE_BASE_URL } from "../../config";
 import { getUserImageUrl } from "../../config";
 
 const TABS = ["Account", "Security", "Settings"];
@@ -65,7 +64,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
     if (isOpen) {
       fetchCurrentUser();
     }
-  }, [isOpen, fetchCurrentUser]);
+  }, [isOpen]);
 
   // Sync preview with user image if available
   useEffect(() => {
