@@ -3,13 +3,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Trash2, Pencil, MessageCircle } from 'lucide-react';
 import clsx from 'clsx';
 
-
 const SidebarItem = ({ chat, isActive, onRename, onDelete, collapsed, onSelect }) => {
   const [isRenaming, setIsRenaming] = useState(false);
   const [inputValue, setInputValue] = useState(chat.title);
   const inputRef = useRef(null);
-
-  // console.log("SidebarItem chat:", chat);
 
   useEffect(() => {
     if (isRenaming && inputRef.current) {
@@ -42,7 +39,13 @@ const SidebarItem = ({ chat, isActive, onRename, onDelete, collapsed, onSelect }
       title={collapsed ? chat.title : undefined}
     >
       <div className="flex items-center gap-2 flex-1 overflow-hidden">
-        <MessageCircle size={16} className="text-gray-500 shrink-0" />
+        <MessageCircle
+          size={16}
+          className={clsx(
+            'shrink-0',
+            isActive ? 'text-white' : 'text-gray-500'
+          )}
+        />
 
         {isRenaming ? (
           <input
@@ -51,10 +54,18 @@ const SidebarItem = ({ chat, isActive, onRename, onDelete, collapsed, onSelect }
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             onBlur={handleRename}
-            className="w-full text-sm bg-transparent border-b border-gray-300 outline-none"
+            className={clsx(
+              'w-full text-sm bg-transparent border-b outline-none',
+              isActive ? 'text-white border-white' : 'text-gray-800 border-gray-300'
+            )}
           />
         ) : (
-          <span className="truncate text-sm text-gray-800">
+          <span
+            className={clsx(
+              'truncate text-sm',
+              isActive ? 'text-white' : 'text-gray-800'
+            )}
+          >
             {chat.title}
           </span>
         )}
@@ -67,7 +78,10 @@ const SidebarItem = ({ chat, isActive, onRename, onDelete, collapsed, onSelect }
               e.stopPropagation();
               setIsRenaming(true);
             }}
-            className="text-gray-400 hover:text-blue-500"
+            className={clsx(
+              'hover:text-yellow-500',
+              isActive ? 'text-white' : 'text-gray-400'
+            )}
             title="Rename"
           >
             <Pencil size={14} />
@@ -77,7 +91,10 @@ const SidebarItem = ({ chat, isActive, onRename, onDelete, collapsed, onSelect }
               e.stopPropagation();
               onDelete();
             }}
-            className="text-gray-400 hover:text-red-500"
+            className={clsx(
+              'hover:text-red-500',
+              isActive ? 'text-white' : 'text-gray-400'
+            )}
             title="Delete"
           >
             <Trash2 size={14} />
